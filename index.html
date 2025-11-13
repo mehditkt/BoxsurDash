@@ -45,7 +45,61 @@
             from { background-position: 0 0; }
             to { background-position: 10000px 10000px; }
         }
+        
+        /* 🚀 STYLE DU LOGO DISCORD (MODIFIÉ AVEC TEXTE NÉON) */
+        #discordLinkContainer {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            text-decoration: none;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
 
+        #discordIcon {
+            font-size: 36px; 
+            color: #7289DA; /* Couleur Discord */
+            line-height: 1;
+            animation: neonBlink 1.5s ease-in-out infinite alternate;
+        }
+        
+        /* NOUVEL ÉLÉMENT: Texte "discord" en néon violet */
+        #discordText {
+            font-size: 16px; 
+            font-weight: bold;
+            color: #cc66ff; /* Violet Néon */
+            margin-top: 5px;
+            text-shadow: 0 0 5px #cc66ff, 0 0 15px #cc66ff;
+            animation: textBlink 2s ease-in-out infinite alternate; 
+            text-transform: uppercase;
+        }
+
+        /* Animation de clignotement néon bleu pour l'icône */
+        @keyframes neonBlink {
+            0% { text-shadow: 0 0 5px #7289DA, 0 0 10px #7289DA; opacity: 1; }
+            50% { text-shadow: 0 0 15px #7289DA, 0 0 25px #7289DA, 0 0 40px #7289DA; opacity: 0.85; }
+            100% { text-shadow: 0 0 5px #7289DA, 0 0 10px #7289DA; opacity: 1; }
+        }
+
+        /* Animation de clignotement néon violet pour le texte */
+        @keyframes textBlink {
+            0% { opacity: 0.8; text-shadow: 0 0 4px #cc66ff, 0 0 8px #cc66ff; }
+            50% { opacity: 1; text-shadow: 0 0 8px #cc66ff, 0 0 20px #cc66ff; }
+            100% { opacity: 0.8; text-shadow: 0 0 4px #cc66ff, 0 0 8px #cc66ff; }
+        }
+
+        #discordLinkContainer:hover {
+            transform: scale(1.1);
+        }
+
+        #discordLinkContainer:hover #discordIcon {
+            animation: none; 
+            text-shadow: 0 0 30px #7289DA, 0 0 50px #7289DA;
+        }
+        
         /* 3. Menu Futuriste (Styles néon/glow) */
         #menu {
             text-align: center;
@@ -69,8 +123,7 @@
         
         #menu h1 {
             font-size: 72px;
-            /* Augmentation de la marge après le titre puisque le sous-titre est supprimé */
-            margin-bottom: 40px; 
+            margin-bottom: 5px;
             color: #fff;
             text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff;
             font-weight: 900;
@@ -166,12 +219,7 @@
             margin-bottom: 10px;
         }
         
-        #apiStatus {
-            font-size: 16px;
-            margin-top: 10px;
-            color: #66ff66; 
-            text-shadow: 0 0 5px #66ff66;
-        }
+        /* Supprimé: #apiStatus */
 
         #highScore {
             color: #ffaa00; 
@@ -436,8 +484,17 @@
     </style>
 </head>
 <body>
+    <a href="https://discord.gg/xfNVbz5q4b" target="_blank" id="discordLinkContainer">
+        <div id="discordIcon">&#127764;</div> 
+        <div id="discordText">discord</div>
+    </a>
+    
+    <audio id="clickSound" src="data:audio/wav;base64,UklGRgQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhBAAAAAD/v/8AAAAA+P//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"></audio>
+
     <div id="menu">
         <h1>BOXSURVDASH.IO</h1>
+        <p class="subtitle">Survivez aux pièges mortels dans le futur !</p>
+        
         <div class="menu-section">
             <h2>Mode de jeu</h2>
             <button class="menu-btn" data-players="1">Solo</button>
@@ -451,8 +508,7 @@
         
         <div class="menu-section">
             <h2 id="highScore">🏆 Meilleur Score: 0s</h2>
-            <p class="subtitle" id="apiStatus">Initialisation de l'API...</p>
-        </div>
+            </div>
     </div>
     
     <div id="skinPanel">
@@ -523,12 +579,30 @@
         let CrazyGames;
         let sdkIsReady = false; 
 
+        // FONCTIONNALITÉ DU SON CORRIGÉE
+        const clickSound = document.getElementById('clickSound');
+        
+        function playClick() {
+            // Tente de charger et de jouer le son
+            if (clickSound.readyState >= 2) { // 2 = HAVE_CURRENT_DATA
+                clickSound.currentTime = 0; 
+                clickSound.play().catch(e => {
+                    // console.log("Audio play failed, likely blocked by browser:", e); 
+                });
+            } else {
+                 // Si non prêt, tente de charger et rejouer
+                 clickSound.load();
+                 clickSound.play().catch(e => {});
+            }
+        }
+        
         const menuDiv = document.getElementById('menu');
         const gameContainerDiv = document.getElementById('gameContainer');
         const gameOverDiv = document.getElementById('gameOver');
         const skinPanel = document.getElementById('skinPanel');
 
         document.getElementById('skinButton').addEventListener('click', () => {
+            playClick(); // JOUER LE SON
             skinPanel.classList.add('open');
             // Pas besoin de display: block; car la classe open gère le right: 0
         });
@@ -713,6 +787,7 @@
         
         document.querySelectorAll('.menu-btn[data-players]').forEach(btn => {
             btn.addEventListener('click', () => {
+                playClick(); // JOUER LE SON
                 const players = parseInt(btn.dataset.players);
                 startGame(players);
             });
@@ -1091,28 +1166,21 @@
         }, 1000);
 
         window.addEventListener('load', () => {
-            const apiStatus = document.getElementById('apiStatus');
-
             if (window.CrazyGames && window.CrazyGames.SDK) {
                 CrazyGames = window.CrazyGames;
                 
                 CrazyGames.SDK.init()
                     .then(() => {
-                        apiStatus.textContent = "API CrazyGames connectée. Bonne chance !";
                         sdkIsReady = true; 
                         setReady(); 
                     })
                     .catch(error => {
-                        apiStatus.textContent = "Erreur de connexion CrazyGames. Jeu en mode local.";
                         setReady();
                     });
             } else {
-                apiStatus.textContent = "SDK non trouvé. Jeu en mode local.";
                 setReady();
             }
         });
     </script>
 </body>
-</html>
-
 </html>
