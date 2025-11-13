@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoxSurvDash.io</title>
+    
+    <script src="https://cdn.crazygames.com/crazygames-game-sdk/latest/crazygames-game-sdk.js"></script>
+    
+    <style>
+        /* 1. Reset et base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 2. Style Futuriste et Fond Étoilé (CRITIQUE) */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0d0c1d; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animation d'étoiles en arrière-plan */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="white" opacity="0.8" /></svg>') repeat;
+            background-size: 10px 10px;
+            opacity: 0.5;
+            animation: moveStars 500s linear infinite;
+        }
+
+        @keyframes moveStars {
+            from { background-position: 0 0; }
+            to { background-position: 10000px 10000px; }
+        }
+
+        /* 3. Menu Futuriste (Styles néon/glow) */
+        #menu {
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            background: rgba(13, 12, 29, 0.85); 
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff; 
+            position: relative;
+            z-index: 2; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        
+        #menu h1 {
+            font-size: 72px;
+            margin-bottom: 5px;
+            color: #fff;
+            text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #00ffff;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        
+        .menu-section {
+            background: rgba(0, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            width: 100%;
+        }
+        
+        .menu-section h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .menu-btn {
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+            color: #0d0c1d;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.4);
+            background: linear-gradient(135deg, #00aaff 0%, #00ffff 100%);
+        }
+
+        #skinButton {
+            padding: 15px 35px;
+            font-size: 16px;
+            background: transparent;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        #skinButton:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(-5px);
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        /* Styles de la zone de jeu */
+        #gameContainer {
+            display: none;
+            text-align: center;
+            position: relative;
+        }
+
+        #gameCanvas {
+            border: 3px solid #ff4500; 
+            box-shadow: 0 0 40px rgba(255, 69, 0, 0.8);
+            background: radial-gradient(ellipse at center, #2a2a3e 0%, #1a1a2e 100%);
+            display: block;
+            margin: 20px auto 0;
+        }
+
+        #info {
+            color: #00ffff;
+            font-size: 20px;
+            text-shadow: 0 0 5px #00ffff;
+            margin-bottom: 10px;
+        }
+        
+        #apiStatus {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #66ff66; 
+            text-shadow: 0 0 5px #66ff66;
+        }
+
+        #highScore {
+            color: #ffaa00; 
+            text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+        }
+
+        /* Game Over Panel */
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(48, 5, 5, 0.95); 
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #ff4500;
+            box-shadow: 0 0 50px rgba(255, 69, 0, 0.9);
+            z-index: 10;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        #gameOver h2 {
+            color: #ff6666;
+            font-size: 48px;
+            text-shadow: 0 0 15px #ff0000;
+            margin-bottom: 20px;
+        }
+        
+        #scores {
+            margin-bottom: 30px;
+            color: white;
+            font-size: 18px;
+        }
+
+        #backToMenu {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #ff4500 0%, #ff8c00 100%); 
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+            font-weight: 700;
+        }
+
+        #backToMenu:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.8);
+        }
+
+        /* 🚀 NOUVEAU STYLE DU PANNEAU DE SKINS (Glisse depuis la droite) */
+        #skinPanel {
+            position: fixed;
+            top: 0;
+            right: -450px; /* Commence hors de l'écran à droite */
+            width: 400px; /* Largeur du panneau */
+            height: 100vh;
+            background: linear-gradient(to bottom right, #0d0c1d 0%, #1a1a2e 100%); /* Dégradé sombre */
+            box-shadow: -10px 0 50px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #00ffff; /* Bordure néon sur le côté gauche */
+            z-index: 100;
+            transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animation de glissement fluide */
+            display: flex; /* Utiliser flexbox pour l'organisation interne */
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+
+        #skinPanel.open {
+            right: 0; /* Glisse vers l'écran */
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .panel-header h2 {
+            font-size: 32px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            font-weight: 700;
+        }
+
+        #closePanel {
+            background: none;
+            border: none;
+            font-size: 36px;
+            color: #ff6666; /* Couleur rouge vif pour le bouton de fermeture */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        #closePanel:hover {
+            transform: rotate(90deg) scale(1.1);
+            color: #ff0000;
+        }
+
+        .player-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(0, 255, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+            color: #0d0c1d;
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            flex-grow: 1; /* Prend l'espace restant */
+            overflow-y: auto; /* Permet le défilement si beaucoup de skins */
+            padding-right: 10px; /* Pour la barre de défilement */
+        }
+
+        .tab-content.active {
+            display: block; /* Ou 'flex' si vous voulez plus de contrôle sur l'alignement */
+        }
+
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* 3 colonnes pour les skins */
+            gap: 15px;
+            padding: 10px 0;
+            justify-items: center;
+        }
+
+        .skin-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            border: 3px solid transparent; /* Bordure par défaut transparente */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.3);
+            background-image: linear-gradient(45deg, #333, #555); /* Fond par défaut pour visibilité */
+        }
+        
+        .skin-option::before {
+            content: '';
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .skin-option:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .skin-option.selected {
+            border-color: #00ffff; /* Bordure néon plus prononcée */
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .skin-option.selected::after {
+            content: '✓'; /* Coche pour la sélection */
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            background: #00ffff; /* Couleur néon */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #0d0c1d; /* Texte sombre pour contraster */
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        /* 🚀 NOUVEAU STYLE DU TOUCH CONTROLS (Positionnement fixe pour ne pas être caché par le panneau) */
+        #touchControls {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 50; /* S'assurer qu'il est au-dessus du jeu */
+        }
+        
+        #leftControls, #rightControls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .touch-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            transition: all 0.2s ease;
+        }
+        
+        .touch-btn:active {
+            background: #00ffff;
+            color: #0d0c1d;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: scale(0.95);
+        }
+        
+        #swipeArea {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* En dessous des contrôles mais au-dessus du canvas */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>BOXSURVDASH.IO</h1>
+        <p class="subtitle">Survivez aux pièges mortels dans le futur !</p>
+        
+        <div class="menu-section">
+            <h2>Mode de jeu</h2>
+            <button class="menu-btn" data-players="1">Solo</button>
+            <button class="menu-btn" data-players="2">2 Joueurs</button>
+            <button class="menu-btn" data-players="3">3 Joueurs</button>
+        </div>
+        
+        <div class="menu-section">
+            <button id="skinButton">🎨 Personnaliser les Skins</button>
+        </div>
+        
+        <div class="menu-section">
+            <h2 id="highScore">🏆 Meilleur Score: 0s</h2>
+            <p class="subtitle" id="apiStatus">Initialisation de l'API...</p>
+        </div>
+    </div>
+    
+    <div id="skinPanel">
+        <div class="panel-header">
+            <h2>Skins des Joueurs</h2>
+            <button id="closePanel">×</button>
+        </div>
+        
+        <div class="player-tabs">
+            <button class="tab-btn active" data-tab="0">Joueur 1</button>
+            <button class="tab-btn" data-tab="1">Joueur 2</button>
+            <button class="tab-btn" data-tab="2">Joueur 3</button>
+        </div>
+        
+        <div class="tab-content active" data-tab="0">
+            <div class="skin-grid" data-player="0"></div>
+        </div>
+        <div class="tab-content" data-tab="1">
+            <div class="skin-grid" data-player="1"></div>
+        </div>
+        <div class="tab-content" data-tab="2">
+            <div class="skin-grid" data-player="2"></div>
+        </div>
+    </div>
+    
+    <div id="gameContainer">
+        <div id="info">
+            <div>Temps: <span id="time">0</span>s | Taille: <span id="size">15x15</span> | Difficulté: x<span id="difficulty">1.0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameOver">
+            <h2>GAME OVER!</h2>
+            <div id="scores"></div>
+            <button id="backToMenu">Retour au Menu</button>
+        </div>
+    </div>
+    
+    <div id="touchControls">
+        <div id="leftControls">
+            <div class="touch-btn" data-key="a">←</div>
+            <div class="touch-btn" data-key="s">↓</div>
+        </div>
+        <div id="rightControls">
+            <div class="touch-btn" data-key="w">↑</div>
+            <div class="touch-btn" data-key="d">→</div>
+        </div>
+    </div>
+    
+    <div id="swipeArea"></div>
+
+    <script>
+        const SKINS = [
+            { name: 'Bleu Néon', color: '#00ffff', gradient: '#0066ff' },
+            { name: 'Rouge Feu', color: '#ff6666', gradient: '#ff0000' },
+            { name: 'Vert Cyb.', color: '#66ff66', gradient: '#00ff00' },
+            { name: 'Violet Élect.', color: '#cc66ff', gradient: '#9900ff' },
+            { name: 'Orange Lave', color: '#ffaa66', gradient: '#ff6600' },
+            { name: 'Rose Cyber', color: '#ff66cc', gradient: '#ff0099' },
+            { name: 'Jaune Or', color: '#ffff66', gradient: '#ffcc00' },
+            { name: 'Cyan Glace', color: '#66ffff', gradient: '#00cccc' }
+        ];
+        
+        let selectedSkins = [0, 1, 2];
+        let highScore = parseInt(localStorage.getItem('boxsurvdashHighScore') || '0');
+        
+        document.getElementById('highScore').textContent = `🏆 Meilleur Score: ${highScore}s`;
+
+        let CrazyGames;
+        let sdkIsReady = false; 
+
+        const menuDiv = document.getElementById('menu');
+        const gameContainerDiv = document.getElementById('gameContainer');
+        const gameOverDiv = document.getElementById('gameOver');
+        const skinPanel = document.getElementById('skinPanel');
+
+        document.getElementById('skinButton').addEventListener('click', () => {
+            skinPanel.classList.add('open');
+            // Pas besoin de display: block; car la classe open gère le right: 0
+        });
+        
+        document.getElementById('closePanel').addEventListener('click', () => {
+            skinPanel.classList.remove('open');
+            // Le panneau glisse hors de l'écran, pas besoin de display: none; immédiatement
+        });
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabIndex = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelector(`.tab-content[data-tab="${tabIndex}"]`).classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.skin-grid').forEach((grid, playerIndex) => {
+            grid.innerHTML = ''; // Nettoyer pour éviter les doublons si l'on ferme/ouvre le panneau
+            SKINS.forEach((skin, skinIndex) => {
+                const skinDiv = document.createElement('div');
+                skinDiv.className = 'skin-option' + (skinIndex === selectedSkins[playerIndex] ? ' selected' : '');
+                skinDiv.style.background = `linear-gradient(135deg, ${skin.color}, ${skin.gradient})`;
+                skinDiv.onclick = () => {
+                    grid.querySelectorAll('.skin-option').forEach(s => s.classList.remove('selected'));
+                    skinDiv.classList.add('selected');
+                    selectedSkins[playerIndex] = skinIndex;
+                };
+                grid.appendChild(skinDiv);
+            });
+        });
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const CELL_SIZE = 35;
+        let GRID_SIZE = 15;
+        
+        canvas.width = GRID_SIZE * CELL_SIZE;
+        canvas.height = GRID_SIZE * CELL_SIZE;
+        
+        let players = [];
+        let numPlayers = 1;
+        let gameTime = 0;
+        let lastExpansion = 0;
+        let gameRunning = false;
+        let lastMove = {};
+        const MOVE_DELAY = 150;
+        let difficultyMultiplier = 1.0;
+        let lastDifficultyIncrease = 0;
+        
+        const PLAYER_KEYS = [
+            { up: 'w', down: 's', left: 'a', right: 'd', name: 'P1' },
+            { up: 't', down: 'g', left: 'f', right: 'h', name: 'P2' },
+            { up: 'i', down: 'k', left: 'j', right: 'l', name: 'P3' }
+        ];
+        
+        let traps = [];
+        let warnings = [];
+        
+        const TRAP_TYPES = {
+            LASER_H: { color: '#00ffff', warningColor: 'rgba(0, 255, 255, 0.5)', duration: 1000, particleColor: '#00aaff' },
+            LASER_V: { color: '#00ffff', warningColor: 'rgba(0, 255, 255, 0.5)', duration: 1000, particleColor: '#00aaff' },
+            SPIKE: { color: '#ff4500', warningColor: 'rgba(255, 100, 0, 0.5)', duration: 15000, particleColor: '#ffa500' }, 
+            HOLE: { color: '#000000', warningColor: 'rgba(0, 0, 0, 0.5)', duration: 15000, particleColor: '#444444' }, 
+            POISON: { color: '#00ff00', warningColor: 'rgba(0, 255, 0, 0.5)', duration: 15000, particleColor: '#00cc00' }, 
+            EXPLOSION: { color: '#ff0000', warningColor: 'rgba(255, 0, 0, 0.5)', duration: 15000, particleColor: '#ff4500' } 
+        };
+        
+        const keys = {};
+        let particles = [];
+        
+        class Particle { 
+            constructor(x, y, color, speedMultiplier = 1) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 3 * speedMultiplier;
+                this.vy = (Math.random() - 0.5) * 3 * speedMultiplier;
+                this.life = 60 * (0.5 + Math.random() * 0.5); 
+                this.maxLife = this.life;
+                this.color = color;
+                this.size = Math.random() * 4 + 2; 
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+                this.vy += 0.05; 
+            }
+            
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = this.color;
+                
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function getRandomPosition() {
+            return {
+                x: Math.floor(Math.random() * GRID_SIZE),
+                y: Math.floor(Math.random() * GRID_SIZE)
+            };
+        }
+        
+        function initPlayers(count) {
+            players = [];
+            for (let i = 0; i < count; i++) {
+                const pos = getRandomPosition();
+                players.push({
+                    x: pos.x,
+                    y: pos.y,
+                    alive: true,
+                    skin: SKINS[selectedSkins[i]],
+                    controls: PLAYER_KEYS[i],
+                    survivalTime: 0
+                });
+                lastMove[i] = 0;
+            }
+        }
+        
+        function setReady() {
+            if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
+                CrazyGames.SDK.game.setReady();
+            }
+        }
+
+        function showAd(callback) {
+            if (sdkIsReady && CrazyGames.SDK.ad) {
+                if (CrazyGames.SDK.game) {
+                    CrazyGames.SDK.game.gameplayStop();
+                }
+                
+                CrazyGames.SDK.ad.requestAd('midgame', () => {
+                    if (CrazyGames.SDK.game) {
+                        CrazyGames.SDK.game.gameplayStart();
+                    }
+                    if (callback) callback();
+                });
+            } else {
+                if (callback) callback();
+            }
+        }
+
+        function startGame(playerCount) {
+            showAd(() => {
+                numPlayers = playerCount;
+                initPlayers(playerCount);
+                gameTime = 0;
+                lastExpansion = 0;
+                difficultyMultiplier = 1.0;
+                lastDifficultyIncrease = 0;
+                GRID_SIZE = 15;
+                canvas.width = GRID_SIZE * CELL_SIZE;
+                canvas.height = GRID_SIZE * CELL_SIZE;
+                traps = [];
+                warnings = [];
+                particles = [];
+                gameRunning = true;
+                
+                menuDiv.style.display = 'none';
+                gameContainerDiv.style.display = 'block';
+                gameOverDiv.style.display = 'none';
+
+                if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
+                    CrazyGames.SDK.game.gameplayStart();
+                }
+                
+                updateTrapSpawnRate();
+                gameLoop();
+            });
+        }
+        
+        document.querySelectorAll('.menu-btn[data-players]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const players = parseInt(btn.dataset.players);
+                startGame(players);
+            });
+        });
+        
+        document.getElementById('backToMenu').addEventListener('click', () => {
+            if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
+                CrazyGames.SDK.game.gameplayStop();
+            }
+            gameOverDiv.style.display = 'none';
+            gameContainerDiv.style.display = 'none';
+            menuDiv.style.display = 'flex'; 
+            gameRunning = false;
+        });
+
+        document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+        document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+        document.querySelectorAll('.touch-btn').forEach(btn => { btn.addEventListener('touchstart', (e) => { e.preventDefault(); const key = btn.dataset.key; handleMove(0, key); }); });
+        let touchStartX = 0; let touchStartY = 0; let touchEndX = 0; let touchEndY = 0; const swipeArea = document.getElementById('swipeArea');
+        swipeArea.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, false);
+        swipeArea.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, false);
+        function handleSwipe() { 
+            const diffX = touchEndX - touchStartX; const diffY = touchEndY - touchStartY; const minSwipeDistance = 30;
+            if (Math.abs(diffX) > Math.abs(diffY)) { if (Math.abs(diffX) > minSwipeDistance) { handleMove(0, diffX > 0 ? 'd' : 'a'); } } 
+            else { if (Math.abs(diffY) > minSwipeDistance) { handleMove(0, diffY > 0 ? 's' : 'w'); } }
+        }
+        function handleMove(playerIndex, key) { 
+            if (!players[playerIndex].alive) return; const now = Date.now();
+            if (now - lastMove[playerIndex] < MOVE_DELAY) return; lastMove[playerIndex] = now;
+            const player = players[playerIndex]; const controls = player.controls; const newPos = { ...player };
+            if (key === controls.up) newPos.y--; if (key === controls.down) newPos.y++; if (key === controls.left) newPos.x--; if (key === controls.right) newPos.x++;
+            if (newPos.x >= 0 && newPos.x < GRID_SIZE && newPos.y >= 0 && newPos.y < GRID_SIZE) { player.x = newPos.x; player.y = newPos.y; }
+        }
+        
+        function createExplosion(x, y, color, particleCount = 20, speed = 1) { 
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2, color, speed));
+            }
+        }
+        
+        function addWarning(x, y, type, duration = 3000) { 
+            warnings.push({ x, y, type, startTime: Date.now(), duration });
+        }
+        
+        let lastTrapSpawn = 0;
+        let TRAP_SPAWN_INTERVAL = 800;
+        
+        function updateTrapSpawnRate() { 
+            const sizeIncrease = GRID_SIZE - 15;
+            TRAP_SPAWN_INTERVAL = Math.max(300, 800 - (sizeIncrease * 30));
+            TRAP_SPAWN_INTERVAL = TRAP_SPAWN_INTERVAL / difficultyMultiplier;
+        }
+        
+        function spawnLaser() { 
+            const isHorizontal = Math.random() > 0.5;
+            const type = isHorizontal ? 'LASER_H' : 'LASER_V';
+            const trapType = TRAP_TYPES[type];
+
+            if (isHorizontal) {
+                const y = Math.floor(Math.random() * GRID_SIZE);
+                for (let x = 0; x < GRID_SIZE; x++) { addWarning(x, y, type); }
+                setTimeout(() => {
+                    traps.push({ x: 0, y, type, createdAt: Date.now() });
+                    for (let x = 0; x < GRID_SIZE; x++) { createExplosion(x, y, trapType.particleColor, 5, 2); }
+                }, 3000);
+            } else {
+                const x = Math.floor(Math.random() * GRID_SIZE);
+                for (let y = 0; y < GRID_SIZE; y++) { addWarning(x, y, type); }
+                setTimeout(() => {
+                    traps.push({ x, y: 0, type, createdAt: Date.now() });
+                    for (let y = 0; y < GRID_SIZE; y++) { createExplosion(x, y, trapType.particleColor, 5, 2); }
+                }, 3000);
+            }
+        }
+        
+        function spawnTrap() { 
+            const types = ['SPIKE', 'HOLE', 'POISON', 'EXPLOSION'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const trapType = TRAP_TYPES[type];
+            
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * GRID_SIZE);
+                y = Math.floor(Math.random() * GRID_SIZE);
+            } while (players.some(p => p.alive && p.x === x && p.y === y));
+            
+            if (type === 'EXPLOSION') {
+                addWarning(x, y, type);
+                setTimeout(() => {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                                traps.push({ x: nx, y: ny, type, createdAt: Date.now() });
+                                createExplosion(nx, ny, trapType.particleColor, 30, 1.5);
+                            }
+                        }
+                    }
+                }, 3000);
+            } else {
+                addWarning(x, y, type);
+                setTimeout(() => {
+                    traps.push({ x, y, type, createdAt: Date.now() });
+                    createExplosion(x, y, trapType.particleColor, 15, 1);
+                }, 3000);
+            }
+        }
+        
+        function drawCaveBackground() { 
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width / 2
+            );
+            gradient.addColorStop(0, '#580808'); 
+            gradient.addColorStop(0.5, '#7d1e1e');
+            gradient.addColorStop(1, '#300505'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = 'rgba(255, 69, 0, 0.7)'; 
+            
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    if ((i + j) % 2 === 0) {
+                         ctx.fillStyle = 'rgba(255, 69, 0, 0.1)'; 
+                    } else {
+                        ctx.fillStyle = 'rgba(139, 0, 0, 0.1)'; 
+                    }
+                    ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawGrid() { 
+            ctx.strokeStyle = 'rgba(255, 69, 0, 0.3)'; 
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= GRID_SIZE; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * CELL_SIZE, 0);
+                ctx.lineTo(i * CELL_SIZE, GRID_SIZE * CELL_SIZE);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL_SIZE);
+                ctx.lineTo(GRID_SIZE * CELL_SIZE, i * CELL_SIZE);
+                ctx.stroke();
+            }
+        }
+        
+        function drawWarnings() { 
+            const now = Date.now();
+            warnings = warnings.filter(w => now - w.startTime < w.duration);
+            
+            warnings.forEach(w => {
+                const progress = (now - w.startTime) / w.duration;
+                const pulse = Math.sin(progress * Math.PI * 15) * 0.5 + 0.5; 
+                
+                ctx.fillStyle = TRAP_TYPES[w.type].warningColor;
+                ctx.globalAlpha = 0.4 + pulse * 0.4;
+                ctx.fillRect(w.x * CELL_SIZE, w.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('!', w.x * CELL_SIZE + CELL_SIZE / 2, w.y * CELL_SIZE + CELL_SIZE / 2); 
+            });
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawTraps() { 
+            const now = Date.now();
+            
+            traps = traps.filter(trap => {
+                const duration = TRAP_TYPES[trap.type].duration;
+                return now - trap.createdAt < duration;
+            });
+            
+            traps.forEach(trap => {
+                const type = TRAP_TYPES[trap.type];
+                
+                if (trap.type === 'LASER_H' || trap.type === 'LASER_V') {
+                    ctx.strokeStyle = type.color;
+                    ctx.lineWidth = 6; 
+                    ctx.shadowBlur = 25; 
+                    ctx.shadowColor = type.color;
+                    
+                    if (trap.type === 'LASER_H') {
+                        const y = trap.y * CELL_SIZE + CELL_SIZE / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(GRID_SIZE * CELL_SIZE, y);
+                        ctx.stroke();
+                    } else {
+                        const x = trap.x * CELL_SIZE + CELL_SIZE / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, GRID_SIZE * CELL_SIZE);
+                        ctx.stroke();
+                    }
+                    
+                    ctx.shadowBlur = 0;
+                } else {
+                    ctx.fillStyle = type.color;
+                    ctx.globalAlpha = 0.9;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = type.color;
+                    
+                    if (trap.type === 'HOLE') {
+                        const centerX = trap.x * CELL_SIZE + CELL_SIZE / 2;
+                        const centerY = trap.y * CELL_SIZE + CELL_SIZE / 2;
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, CELL_SIZE / 2 - 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        ctx.fillRect(trap.x * CELL_SIZE + 3, trap.y * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6);
+                    }
+                }
+                
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function drawPlayers() { 
+            players.forEach((player, index) => {
+                if (!player.alive) return;
+                
+                const centerX = player.x * CELL_SIZE + CELL_SIZE / 2;
+                const centerY = player.y * CELL_SIZE + CELL_SIZE / 2;
+                
+                const gradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, 12);
+                gradient.addColorStop(0, player.skin.color);
+                gradient.addColorStop(1, player.skin.gradient);
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = player.skin.color;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(player.controls.name, centerX, centerY - 20);
+            });
+        }
+        
+        function checkCollisions() { 
+            players.forEach((player, index) => {
+                if (!player.alive) return;
+                
+                const hit = traps.some(trap => {
+                    if (trap.type === 'LASER_H') {
+                        return trap.y === player.y;
+                    } else if (trap.type === 'LASER_V') {
+                        return trap.x === player.x;
+                    } else {
+                        return trap.x === player.x && trap.y === player.y;
+                    }
+                });
+                
+                if (hit) {
+                    player.alive = false;
+                    player.survivalTime = gameTime;
+                    createExplosion(player.x, player.y, player.skin.gradient, 40, 2); 
+                }
+            });
+            
+            if (players.every(p => !p.alive)) {
+                gameOver();
+            }
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            const maxTime = Math.max(...players.map(p => p.survivalTime));
+            if (maxTime > highScore) {
+                highScore = maxTime;
+                if (sdkIsReady && CrazyGames.SDK.leaderboard) {
+                    CrazyGames.SDK.leaderboard.submitScore('SurvivalTime', maxTime);
+                }
+                localStorage.setItem('boxsurvdashHighScore', highScore.toString());
+                document.getElementById('highScore').textContent = `🏆 Meilleur Score: ${highScore}s`;
+            }
+            
+            if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
+                CrazyGames.SDK.game.gameplayStop();
+            }
+
+            const scoresDiv = document.getElementById('scores');
+            scoresDiv.innerHTML = players.map((p, i) => 
+                `<div class="score-item">${p.controls.name}: ${p.survivalTime}s</div>`
+            ).join('');
+            
+            gameOverDiv.style.display = 'block';
+
+            showAd(() => {});
+        }
+        
+        function expandGrid() { 
+            GRID_SIZE++;
+            canvas.width = GRID_SIZE * CELL_SIZE;
+            canvas.height = GRID_SIZE * CELL_SIZE;
+            document.getElementById('size').textContent = `${GRID_SIZE}x${GRID_SIZE}`;
+        }
+        
+        function updateParticles() { 
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+        }
+        
+        function gameLoop() { 
+            if (!gameRunning) return;
+            
+            const now = Date.now();
+            
+            players.forEach((player, index) => {
+                if (!player.alive) return;
+                const controls = player.controls;
+                if (keys[controls.up]) handleMove(index, controls.up);
+                if (keys[controls.down]) handleMove(index, controls.down);
+                if (keys[controls.left]) handleMove(index, controls.left);
+                if (keys[controls.right]) handleMove(index, controls.right);
+            });
+            
+            if (now - lastTrapSpawn > TRAP_SPAWN_INTERVAL) {
+                if (Math.random() > 0.3) {
+                    spawnLaser();
+                } else {
+                    spawnTrap();
+                }
+                lastTrapSpawn = now;
+            }
+            
+            if (gameTime - lastExpansion >= 600) { expandGrid(); updateTrapSpawnRate(); lastExpansion = gameTime; }
+            if (gameTime - lastDifficultyIncrease >= 50) { difficultyMultiplier += 0.1; updateTrapSpawnRate(); lastDifficultyIncrease = gameTime; document.getElementById('difficulty').textContent = difficultyMultiplier.toFixed(1); }
+            
+            checkCollisions();
+            
+            drawCaveBackground();
+            drawGrid();
+            drawWarnings();
+            drawTraps();
+            updateParticles();
+            drawPlayers();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        setInterval(() => { 
+            if (gameRunning) {
+                gameTime++;
+                document.getElementById('time').textContent = gameTime;
+            }
+        }, 1000);
+
+        window.addEventListener('load', () => {
+            const apiStatus = document.getElementById('apiStatus');
+
+            if (window.CrazyGames && window.CrazyGames.SDK) {
+                CrazyGames = window.CrazyGames;
+                
+                CrazyGames.SDK.init()
+                    .then(() => {
+                        apiStatus.textContent = "API CrazyGames connectée. Bonne chance !";
+                        sdkIsReady = true; 
+                        setReady(); 
+                    })
+                    .catch(error => {
+                        apiStatus.textContent = "Erreur de connexion CrazyGames. Jeu en mode local.";
+                        setReady();
+                    });
+            } else {
+                apiStatus.textContent = "SDK non trouvé. Jeu en mode local.";
+                setReady();
+            }
+        });
+    </script>
+</body>
+</html>
