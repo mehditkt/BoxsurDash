@@ -46,19 +46,32 @@
             to { background-position: 10000px 10000px; }
         }
         
-        /* 🚀 STYLE DU LOGO DISCORD (MODIFIÉ AVEC TEXTE NÉON) */
-        #discordLinkContainer {
+        /* 🚀 CONTENEUR POUR LES BOUTONS FIXES EN HAUT À GAUCHE (hors-jeu) */
+        #topLinksContainer {
             position: fixed;
             top: 20px;
             left: 20px;
             z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Espace entre les boutons */
+        }
+        
+        /* 🚀 STYLE GÉNÉRAL DES BOUTONS FIXES */
+        #discordLinkContainer, #downloadLinkContainer {
             text-decoration: none;
             display: flex; 
             flex-direction: column;
             align-items: center;
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
 
+        #discordLinkContainer:hover, #downloadLinkContainer:hover {
+            transform: scale(1.1);
+        }
+
+        /* --- DISCORD --- */
         #discordIcon {
             font-size: 36px; 
             color: #7289DA; /* Couleur Discord */
@@ -66,7 +79,6 @@
             animation: neonBlink 1.5s ease-in-out infinite alternate;
         }
         
-        /* NOUVEL ÉLÉMENT: Texte "discord" en néon violet */
         #discordText {
             font-size: 16px; 
             font-weight: bold;
@@ -75,6 +87,32 @@
             text-shadow: 0 0 5px #cc66ff, 0 0 15px #cc66ff;
             animation: textBlink 2s ease-in-out infinite alternate; 
             text-transform: uppercase;
+        }
+
+        #discordLinkContainer:hover #discordIcon {
+            animation: none; 
+            text-shadow: 0 0 30px #7289DA, 0 0 50px #7289DA;
+        }
+        
+        /* --- DOWNLOAD --- */
+        #downloadIcon {
+            font-size: 36px;
+            color: #ffaa00; /* Couleur Orange/Or */
+            line-height: 1;
+            transition: text-shadow 0.3s ease;
+        }
+
+        #downloadText {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffaa00; /* Couleur Orange/Or */
+            margin-top: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px #ffaa00, 0 0 10px #ffaa00;
+        }
+        
+        #downloadLinkContainer:hover #downloadIcon {
+            text-shadow: 0 0 30px #ffaa00, 0 0 50px #ffaa00;
         }
 
         /* Animation de clignotement néon bleu pour l'icône */
@@ -89,15 +127,6 @@
             0% { opacity: 0.8; text-shadow: 0 0 4px #cc66ff, 0 0 8px #cc66ff; }
             50% { opacity: 1; text-shadow: 0 0 8px #cc66ff, 0 0 20px #cc66ff; }
             100% { opacity: 0.8; text-shadow: 0 0 4px #cc66ff, 0 0 8px #cc66ff; }
-        }
-
-        #discordLinkContainer:hover {
-            transform: scale(1.1);
-        }
-
-        #discordLinkContainer:hover #discordIcon {
-            animation: none; 
-            text-shadow: 0 0 30px #7289DA, 0 0 50px #7289DA;
         }
         
         /* 3. Menu Futuriste (Styles néon/glow) */
@@ -123,7 +152,7 @@
         
         #menu h1 {
             font-size: 72px;
-            margin-bottom: 5px;
+            margin-bottom: 5px; 
             color: #fff;
             text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff;
             font-weight: 900;
@@ -204,6 +233,34 @@
             position: relative;
         }
 
+        /* 🚀 NOUVEAU STYLE DU BOUTON ENGRENAGE */
+        #settingsButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.1); /* Transparent/néon */
+            color: #00ffff; /* Couleur néon */
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 15; /* Au-dessus du canvas */
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+        }
+
+        #settingsButton:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
         #gameCanvas {
             border: 3px solid #ff4500; 
             box-shadow: 0 0 40px rgba(255, 69, 0, 0.8);
@@ -219,8 +276,6 @@
             margin-bottom: 10px;
         }
         
-        /* Supprimé: #apiStatus */
-
         #highScore {
             color: #ffaa00; 
             text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
@@ -275,25 +330,73 @@
             box-shadow: 0 0 30px rgba(255, 69, 0, 0.8);
         }
 
-        /* 🚀 NOUVEAU STYLE DU PANNEAU DE SKINS (Glisse depuis la droite) */
+        /* 🚀 STYLE DU PANNEAU DE PAUSE */
+        #pauseMenu {
+            display: none; /* Caché par défaut */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(13, 12, 29, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 50px;
+            border-radius: 20px;
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+            z-index: 20; 
+            width: 80%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        #pauseMenu h2 {
+            color: #00ffff;
+            font-size: 40px;
+            text-shadow: 0 0 15px #00ffff;
+            margin-bottom: 30px;
+        }
+
+        .pause-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 30px;
+            margin: 15px 0;
+            font-size: 20px;
+            background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+            color: #0d0c1d;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pause-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        }
+
+        /* Styles pour les autres panneaux (skins, touch controls) */
         #skinPanel {
             position: fixed;
             top: 0;
-            right: -450px; /* Commence hors de l'écran à droite */
-            width: 400px; /* Largeur du panneau */
+            right: -450px; 
+            width: 400px;
             height: 100vh;
-            background: linear-gradient(to bottom right, #0d0c1d 0%, #1a1a2e 100%); /* Dégradé sombre */
+            background: linear-gradient(to bottom right, #0d0c1d 0%, #1a1a2e 100%);
             box-shadow: -10px 0 50px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
-            border-left: 3px solid #00ffff; /* Bordure néon sur le côté gauche */
+            border-left: 3px solid #00ffff;
             z-index: 100;
-            transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animation de glissement fluide */
-            display: flex; /* Utiliser flexbox pour l'organisation interne */
+            transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
             flex-direction: column;
             padding: 30px 20px;
         }
 
         #skinPanel.open {
-            right: 0; /* Glisse vers l'écran */
+            right: 0;
         }
 
         .panel-header {
@@ -316,7 +419,7 @@
             background: none;
             border: none;
             font-size: 36px;
-            color: #ff6666; /* Couleur rouge vif pour le bouton de fermeture */
+            color: #ff6666;
             cursor: pointer;
             transition: all 0.3s ease;
             text-shadow: 0 0 10px #ff0000;
@@ -362,18 +465,18 @@
 
         .tab-content {
             display: none;
-            flex-grow: 1; /* Prend l'espace restant */
-            overflow-y: auto; /* Permet le défilement si beaucoup de skins */
-            padding-right: 10px; /* Pour la barre de défilement */
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-right: 10px;
         }
 
         .tab-content.active {
-            display: block; /* Ou 'flex' si vous voulez plus de contrôle sur l'alignement */
+            display: block; 
         }
 
         .skin-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* 3 colonnes pour les skins */
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 15px;
             padding: 10px 0;
             justify-items: center;
@@ -389,9 +492,9 @@
             justify-content: center;
             align-items: center;
             transition: all 0.2s ease;
-            border: 3px solid transparent; /* Bordure par défaut transparente */
+            border: 3px solid transparent; 
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.3);
-            background-image: linear-gradient(45deg, #333, #555); /* Fond par défaut pour visibilité */
+            background-image: linear-gradient(45deg, #333, #555);
         }
         
         .skin-option::before {
@@ -409,30 +512,30 @@
         }
 
         .skin-option.selected {
-            border-color: #00ffff; /* Bordure néon plus prononcée */
+            border-color: #00ffff; 
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.3);
             transform: scale(1.1);
         }
         
         .skin-option.selected::after {
-            content: '✓'; /* Coche pour la sélection */
+            content: '✓'; 
             position: absolute;
             top: -10px;
             right: -10px;
             width: 30px;
             height: 30px;
-            background: #00ffff; /* Couleur néon */
+            background: #00ffff; 
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #0d0c1d; /* Texte sombre pour contraster */
+            color: #0d0c1d; 
             font-size: 20px;
             font-weight: bold;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
         }
 
-        /* 🚀 NOUVEAU STYLE DU TOUCH CONTROLS (Positionnement fixe pour ne pas être caché par le panneau) */
+        /* 🚀 STYLE DU TOUCH CONTROLS (Positionnement fixe pour ne pas être caché par le panneau) */
         #touchControls {
             position: fixed;
             bottom: 20px;
@@ -440,7 +543,7 @@
             display: flex;
             justify-content: space-between;
             padding: 0 20px;
-            z-index: 50; /* S'assurer qu'il est au-dessus du jeu */
+            z-index: 50;
         }
         
         #leftControls, #rightControls {
@@ -478,16 +581,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* En dessous des contrôles mais au-dessus du canvas */
+            z-index: 1;
         }
 
     </style>
 </head>
 <body>
-    <a href="https://discord.gg/xfNVbz5q4b" target="_blank" id="discordLinkContainer">
-        <div id="discordIcon">&#127764;</div> 
-        <div id="discordText">discord</div>
-    </a>
+    <div id="topLinksContainer">
+        <a href="https://discord.gg/xfNVbz5q4b" target="_blank" id="discordLinkContainer">
+            <div id="discordIcon">&#127764;</div> 
+            <div id="discordText">discord</div>
+        </a>
+        
+        <div id="downloadLinkContainer">
+            <div id="downloadIcon">&#x2193;</div> 
+            <div id="downloadText">download</div>
+        </div>
+    </div>
     
     <audio id="clickSound" src="data:audio/wav;base64,UklGRgQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhBAAAAAD/v/8AAAAA+P//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"></audio>
 
@@ -535,10 +645,19 @@
     </div>
     
     <div id="gameContainer">
+        <button id="settingsButton" aria-label="Menu Pause/Paramètres">&#9881;</button> 
+
         <div id="info">
             <div>Temps: <span id="time">0</span>s | Taille: <span id="size">15x15</span> | Difficulté: x<span id="difficulty">1.0</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
+        
+        <div id="pauseMenu">
+            <h2>PAUSE</h2>
+            <button id="resumeButton" class="pause-btn">RESUME</button>
+            <button id="quitButton" class="pause-btn">QUIT PARTY</button>
+        </div>
+        
         <div id="gameOver">
             <h2>GAME OVER!</h2>
             <div id="scores"></div>
@@ -578,42 +697,68 @@
 
         let CrazyGames;
         let sdkIsReady = false; 
+        let gamePaused = false; 
+        let gameLoopInterval = null; 
 
-        // FONCTIONNALITÉ DU SON CORRIGÉE
+        // FONCTIONNALITÉ DU SON 
         const clickSound = document.getElementById('clickSound');
         
         function playClick() {
-            // Tente de charger et de jouer le son
-            if (clickSound.readyState >= 2) { // 2 = HAVE_CURRENT_DATA
+            if (clickSound.readyState >= 2) { 
                 clickSound.currentTime = 0; 
                 clickSound.play().catch(e => {
                     // console.log("Audio play failed, likely blocked by browser:", e); 
                 });
             } else {
-                 // Si non prêt, tente de charger et rejouer
                  clickSound.load();
                  clickSound.play().catch(e => {});
             }
         }
         
+        // FONCTION DE TÉLÉCHARGEMENT D'UN FICHIER TEXTE (Simule le téléchargement du jeu)
+        document.getElementById('downloadLinkContainer').addEventListener('click', () => {
+            playClick(); 
+            
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'BoxSurvDash.html';
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        
         const menuDiv = document.getElementById('menu');
         const gameContainerDiv = document.getElementById('gameContainer');
         const gameOverDiv = document.getElementById('gameOver');
         const skinPanel = document.getElementById('skinPanel');
+        const pauseMenuDiv = document.getElementById('pauseMenu'); 
 
         document.getElementById('skinButton').addEventListener('click', () => {
-            playClick(); // JOUER LE SON
+            playClick(); 
             skinPanel.classList.add('open');
-            // Pas besoin de display: block; car la classe open gère le right: 0
         });
         
         document.getElementById('closePanel').addEventListener('click', () => {
+            playClick(); 
             skinPanel.classList.remove('open');
-            // Le panneau glisse hors de l'écran, pas besoin de display: none; immédiatement
+        });
+
+        // ⚙️ NOUVEAU: Gestionnaire d'événement pour le bouton Engrenage
+        document.getElementById('settingsButton').addEventListener('click', () => {
+            playClick();
+            togglePause();
         });
         
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                playClick(); 
                 const tabIndex = btn.dataset.tab;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -623,12 +768,13 @@
         });
         
         document.querySelectorAll('.skin-grid').forEach((grid, playerIndex) => {
-            grid.innerHTML = ''; // Nettoyer pour éviter les doublons si l'on ferme/ouvre le panneau
+            grid.innerHTML = ''; 
             SKINS.forEach((skin, skinIndex) => {
                 const skinDiv = document.createElement('div');
                 skinDiv.className = 'skin-option' + (skinIndex === selectedSkins[playerIndex] ? ' selected' : '');
                 skinDiv.style.background = `linear-gradient(135deg, ${skin.color}, ${skin.gradient})`;
                 skinDiv.onclick = () => {
+                    playClick(); 
                     grid.querySelectorAll('.skin-option').forEach(s => s.classList.remove('selected'));
                     skinDiv.classList.add('selected');
                     selectedSkins[playerIndex] = skinIndex;
@@ -771,10 +917,12 @@
                 warnings = [];
                 particles = [];
                 gameRunning = true;
+                gamePaused = false;
                 
                 menuDiv.style.display = 'none';
                 gameContainerDiv.style.display = 'block';
                 gameOverDiv.style.display = 'none';
+                pauseMenuDiv.style.display = 'none'; 
 
                 if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
                     CrazyGames.SDK.game.gameplayStart();
@@ -782,33 +930,78 @@
                 
                 updateTrapSpawnRate();
                 gameLoop();
+                gameLoopInterval = setInterval(updateGameTime, 1000); 
             });
+        }
+        
+        function updateGameTime() {
+            if (gameRunning && !gamePaused) {
+                gameTime++;
+                document.getElementById('time').textContent = gameTime;
+            }
+        }
+
+        function togglePause() {
+            if (!gameRunning) return;
+
+            gamePaused = !gamePaused;
+            if (gamePaused) {
+                pauseMenuDiv.style.display = 'block';
+            } else {
+                pauseMenuDiv.style.display = 'none';
+                gameLoop(); 
+            }
         }
         
         document.querySelectorAll('.menu-btn[data-players]').forEach(btn => {
             btn.addEventListener('click', () => {
-                playClick(); // JOUER LE SON
+                playClick(); 
                 const players = parseInt(btn.dataset.players);
                 startGame(players);
             });
         });
         
         document.getElementById('backToMenu').addEventListener('click', () => {
+            playClick(); 
+            quitParty();
+        });
+
+        // Boutons du menu Pause
+        document.getElementById('resumeButton').addEventListener('click', () => {
+            playClick();
+            togglePause(); 
+        });
+
+        document.getElementById('quitButton').addEventListener('click', () => {
+            playClick();
+            quitParty();
+        });
+        
+        function quitParty() {
+            clearInterval(gameLoopInterval);
             if (CrazyGames && CrazyGames.SDK && CrazyGames.SDK.game) {
                 CrazyGames.SDK.game.gameplayStop();
             }
             gameOverDiv.style.display = 'none';
+            pauseMenuDiv.style.display = 'none';
             gameContainerDiv.style.display = 'none';
             menuDiv.style.display = 'flex'; 
             gameRunning = false;
-        });
+            gamePaused = false;
+        }
 
-        document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+        // Gestion de la touche P pour la Pause
+        document.addEventListener('keydown', (e) => { 
+            keys[e.key] = true; 
+            if (e.key.toLowerCase() === 'p' && gameRunning && gameOverDiv.style.display === 'none') {
+                togglePause();
+            }
+        });
         document.addEventListener('keyup', (e) => { keys[e.key] = false; });
-        document.querySelectorAll('.touch-btn').forEach(btn => { btn.addEventListener('touchstart', (e) => { e.preventDefault(); const key = btn.dataset.key; handleMove(0, key); }); });
+        document.querySelectorAll('.touch-btn').forEach(btn => { btn.addEventListener('touchstart', (e) => { e.preventDefault(); const key = btn.dataset.key; if (!gamePaused) handleMove(0, key); }); });
         let touchStartX = 0; let touchStartY = 0; let touchEndX = 0; let touchEndY = 0; const swipeArea = document.getElementById('swipeArea');
         swipeArea.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, false);
-        swipeArea.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, false);
+        swipeArea.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; if (!gamePaused) handleSwipe(); }, false);
         function handleSwipe() { 
             const diffX = touchEndX - touchStartX; const diffY = touchEndY - touchStartY; const minSwipeDistance = 30;
             if (Math.abs(diffX) > Math.abs(diffY)) { if (Math.abs(diffX) > minSwipeDistance) { handleMove(0, diffX > 0 ? 'd' : 'a'); } } 
@@ -1080,6 +1273,7 @@
         
         function gameOver() {
             gameRunning = false;
+            clearInterval(gameLoopInterval);
             
             const maxTime = Math.max(...players.map(p => p.survivalTime));
             if (maxTime > highScore) {
@@ -1122,12 +1316,14 @@
         
         function gameLoop() { 
             if (!gameRunning) return;
+            if (gamePaused) return; 
             
             const now = Date.now();
             
             players.forEach((player, index) => {
                 if (!player.alive) return;
                 const controls = player.controls;
+                // La détection des mouvements reste ici, mais le handleMove vérifie le délai
                 if (keys[controls.up]) handleMove(index, controls.up);
                 if (keys[controls.down]) handleMove(index, controls.down);
                 if (keys[controls.left]) handleMove(index, controls.left);
@@ -1143,6 +1339,7 @@
                 lastTrapSpawn = now;
             }
             
+            // Logique de difficulté et expansion (basée sur le temps du jeu non-pausé)
             if (gameTime - lastExpansion >= 600) { expandGrid(); updateTrapSpawnRate(); lastExpansion = gameTime; }
             if (gameTime - lastDifficultyIncrease >= 50) { difficultyMultiplier += 0.1; updateTrapSpawnRate(); lastDifficultyIncrease = gameTime; document.getElementById('difficulty').textContent = difficultyMultiplier.toFixed(1); }
             
@@ -1158,13 +1355,7 @@
             requestAnimationFrame(gameLoop);
         }
         
-        setInterval(() => { 
-            if (gameRunning) {
-                gameTime++;
-                document.getElementById('time').textContent = gameTime;
-            }
-        }, 1000);
-
+        // Initialisation de l'API (sans message affiché)
         window.addEventListener('load', () => {
             if (window.CrazyGames && window.CrazyGames.SDK) {
                 CrazyGames = window.CrazyGames;
@@ -1175,13 +1366,14 @@
                         setReady(); 
                     })
                     .catch(error => {
+                        sdkIsReady = false; 
                         setReady();
                     });
             } else {
+                sdkIsReady = false;
                 setReady();
             }
         });
     </script>
 </body>
 </html>
-
